@@ -1,10 +1,22 @@
 body {
-  font-family: 'Exo 2', sans-serif;
-
+	font-family: 'Exo 2', sans-serif;
+	background-color: rgb(84, 84, 84);
+	color:white;
+	padding:1%;
 }
 
 h1, h2, h3 {
-  font-family: 'Press Start 2P', cursive;
+	font-family: 'Press Start 2P', cursive;
+	color: rgb(132, 221, 99);
+}
+
+.info-bar {
+	height: 30vh;
+}
+.changelog {
+	border-right: 2px solid rgb(107, 170, 117);
+	height: 70vh;
+	background-color: rgb(105, 116, 124);
 }
 
 

@@ -34,12 +34,12 @@
   ///////////////////////////////////////////////////////////
   // Initialisation and Main
   
-  SetupDatabase();
+  //SetupDatabase();
 
-  AddSite("https://stackoverflow.com/");
+	//AddSite("https://stackoverflow.com/");
 
-  SearchNextQueue();
-  var_dump( RunSearch("overflow"));
+  //SearchNextQueue();
+  //var_dump( RunSearch("overflow"));
   ///////////////////////////////////////////////////////////
   // Main Functions
   
@@ -181,9 +181,9 @@
     $sql = "CREATE DATABASE search_engine;"; // Create the DATABASE
 
     if ($conn->query($sql) === TRUE) {
-        echo "Database created successfully ($sql)";
+        AppLog( "Database created successfully ($sql)");
     } else {
-        echo "Error creating database: ($sql) <br>" . $conn->error;
+        AppLog( "Error creating database: ($sql) <br>" . $conn->error);
     }
 
 	// Creating required tables
@@ -201,9 +201,9 @@
       PRIMARY KEY (`id`)) ENGINE = InnoDB;";
 
       if ($conn->query($sql) === TRUE) {
-          echo "Records created successfully ($sql)";
+          AppLog( "Records created successfully ($sql)");
       } else {
-          echo "Error creating records: ($sql) <br>" . $conn->error;
+          AppLog( "Error creating records: ($sql) <br>" . $conn->error);
       }
 
 	// Create queue table
@@ -213,9 +213,9 @@
          PRIMARY KEY (`id`)) ENGINE = InnoDB;";
 
          if ($conn->query($sql) === TRUE) {
-             echo "Queue created successfully ($sql)";
+             AppLog( "Queue created successfully ($sql)");
          } else {
-             echo "Error creating queue: ($sql) <br>" . $conn->error;
+             AppLog( "Error creating queue: ($sql) <br>" . $conn->error);
          }
 
   }
@@ -418,9 +418,9 @@
     if (!($result->num_rows > 0)) {
       $sql = "INSERT INTO `queue` (`id`, `url`) VALUES (NULL, '$url')";
       if($conn->query($sql)===TRUE) {
-        echo $url." Added to queue. <br>";
+        AppLog( $url." Added to queue. <br>");
       } else {
-        echo $url." could not be added to queue (".$conn->error.") <br>";
+        AppLog( $url." could not be added to queue (".$conn->error.") <br>");
       }
     } else {
       AppLog("Duplicate URL in queue");
@@ -460,7 +460,7 @@
   // Log to the console
   // TODO: Save log to file
   function AppLog($str) {
-    echo "Log: $str <br>";
+    //echo "Log: $str <br>";
   }
   // End function 
   
