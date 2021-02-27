@@ -40,6 +40,7 @@
 
   //SearchNextQueue();
   //var_dump( RunSearch("overflow"));
+  
   ///////////////////////////////////////////////////////////
   // Main Functions
   
@@ -59,7 +60,7 @@
 		// Loop through every row (should only be one)
 		while($row = mysqli_fetch_assoc($result)) {
 			
-		   AddSite($row['url']);
+		   AddSite(htmlspecialchars_decode($row['url']));
 		   
 		   $sql = "DELETE FROM `queue` WHERE `queue`.`id` = ".$row['id'];
 		   $conn->query($sql);
@@ -74,6 +75,8 @@
   // Run the search algorithm
   function RunSearch($search) {
 	  global $SQL_HOSTNAME,$SQL_NAME,$SQL_PASS,$RETURN_LIMIT;
+	  
+	  $CURRENT_STATUS = "working";
 	  // TODO: Add thresholds from constants.php to global and use in the scoring instead of constants
 	  
 	  // Find all SQL entries where title or keywords contain any of the keywords searched (TODO: include synonyms)
@@ -140,6 +143,7 @@
 		 return "empty";
 	  }
 	  arsort($urls);
+	  $CURRENT_STATUS = "free";
 	  return $urls;
 	  
   }
@@ -230,7 +234,8 @@
     global $IGNORE_WORDS;
     global $SQL_HOSTNAME,$SQL_NAME,$SQL_PASS;
 
-
+	$CURRENT_STATUS = "working";
+	
     AppLog("Adding site {$url}");
 
     $title = "";
@@ -283,6 +288,7 @@
 	// Skip if it is the website's URl 
 	// Skip if it is not an HTTP/HTTPS link
 	
+	$prev = "";
 	if(substr($url,-1) != "/") $url = $url."/";
 
     foreach($links as $link) {
@@ -293,7 +299,9 @@
       else if($link[0] == "/") $link = $url.substr($link,1);
       else if($link[0] == "#") continue;
       else if(strpos($link, 'http') !== true) continue;
-
+	  else if($link == $prev) continue;
+	  
+	  $prev = $link;
       AddToQueue($link);
     }
 
@@ -391,6 +399,7 @@
     }
 	
     AppLog("Done!");
+	$CURRENT_STATUS = "free";
   }
   // End function
   

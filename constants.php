@@ -45,4 +45,6 @@
   
   $SEARCH_THRESHOLD = 2;
   
+  $CURRENT_STATUS = "free";
+  
  ?>
