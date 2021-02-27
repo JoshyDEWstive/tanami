@@ -19,6 +19,9 @@
 	$recordsCount = $conn->query($sql);
 	if($recordsCount->num_rows > 0) while ($row = mysqli_fetch_assoc($recordsCount)) { $recordsCount = $row['Count(*)']; break; }
 	
+	$recordsSize = GetRecordsSize();
+	$queueSize = GetQueueSize();
+	$databaseSize = $recordsSize + $queueSize;
 ?>
 
 <html>
@@ -57,11 +60,12 @@
 				</thead>
 				<tbody>
 					<tr>
+						
 						<td><?php echo $queueCount; ?></td>
 						<td><?php echo $recordsCount; ?></td>
-						<td>0</td>
-						<td>0</td>
-						<td>0</td>
+						<td><?php echo $databaseSize; ?></td>
+						<td><?php echo $recordsSize; ?></td>
+						<td><?php echo $queueSize; ?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -74,8 +78,6 @@
 		<div class="col-xs-12 col-md-4 changelog text-center">
 			<div class="btn-group">
 			  <a type="button" class="btn btn-primary" href='index.php' >Reload Page</a>
-			  <a type="button" class="btn btn-success" href='actions.php?action=next-queue'>Next Queue</a>
-			  <a type="button" class="btn btn-danger">Delete Queue</a>
 			</div>
 			
 			<hr>
@@ -89,5 +91,17 @@
 	</div>
 	
   </body>
+	
+	
+<script>
+    $(document).ready(function() {
+        // auto refresh page after 1 second
+        setInterval('refreshPage()', 10000);
+    });
+ 
+    function refreshPage() { 
+        location.reload(); 
+    }
+</script>
 
 </html>

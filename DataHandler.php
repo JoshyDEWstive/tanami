@@ -60,10 +60,14 @@
 		// Loop through every row (should only be one)
 		while($row = mysqli_fetch_assoc($result)) {
 			
-		   AddSite(htmlspecialchars_decode($row['url']));
-		   
+		   try {
+			   AddSite(htmlspecialchars_decode($row['url']));
+		   } catch (Exception $e) {
+			   
+		   } finally {
 		   $sql = "DELETE FROM `queue` WHERE `queue`.`id` = ".$row['id'];
 		   $conn->query($sql);
+		   }
 		}  
 		
 	  } else {
@@ -148,20 +152,23 @@
 	  
   }
   // End function
-  
+
   // Every time a word in the search is found in the comparator increase the returned score by one.
   function GetStringScore($search,$comparator) {
 	  
 	  $search = trim(strtolower(htmlspecialchars(strip_tags($search))));
+	  $comparators = explode(" ", $comparator);
 	  $words = explode(" ",$search);
 	  if(count($words) <= 0) $words = explode(",",$search);
 	  $score = 0;
 	  
 	  foreach($words as $word) {
-		  if(strpos($word,$comparator) !== false) $score = $score + 1;
+		  foreach($comparators as $c) {
+			  if(strpos($word,$c) !== false) $score = $score + 1;
+		  }
 	  }
 
-	  AppLog("Was searching for $comparator found $score results");
+	  AppLog("Was searching for $comparator in $search found $score results");
 	  return $score;
   }
   
@@ -180,7 +187,11 @@
         die("Connection failed: " . $conn->connect_error);
     }
 
-	$conn->query("DROP DATABASE IF EXISTS search_engine");
+	if($conn->query("DROP DATABASE IF EXISTS search_engine") === TRUE) {
+		AppLog("Database dropped");
+	} else {
+		AppLog("Database failed to drop.");
+	}
 
     $sql = "CREATE DATABASE search_engine;"; // Create the DATABASE
 
@@ -289,10 +300,12 @@
 	// Skip if it is not an HTTP/HTTPS link
 	
 	$prev = "";
-	if(substr($url,-1) != "/") $url = $url."/";
+	
+	$url = "http://".parse_url($url, PHP_URL_HOST)."/";
 
     foreach($links as $link) {
-		
+	
+		/*
       if($link == "/") continue;
       else if($link == $url) continue;
       else if($link == substr($url,0,-1)) continue;
@@ -300,6 +313,14 @@
       else if($link[0] == "#") continue;
       else if(strpos($link, 'http') !== true) continue;
 	  else if($link == $prev) continue;
+	  */
+	  if($link == $prev) continue;
+	  else if(strpos($link,'http') !== false) $link = $link;
+	  else if($link == "/") $link = $url;
+	  else if($link[0] == "#") continue;
+	  else if($link[0] == "/") $link = $url.substr($link,1);
+	  else if($link == "javascript:void(0)") continue;
+	  else if($link[0] != "/") $link = $url.$link;
 	  
 	  $prev = $link;
       AddToQueue($link);
@@ -469,9 +490,62 @@
   // Log to the console
   // TODO: Save log to file
   function AppLog($str) {
-    //echo "Log: $str <br>";
+    echo "Log: $str <br>";
   }
   // End function 
   
+  function GetQueueSize() {
+	global $SQL_HOSTNAME,$SQL_NAME,$SQL_PASS;
+
+	// Create SQL connection
+    $conn = new mysqli($SQL_HOSTNAME, $SQL_NAME, $SQL_PASS,"search_engine");
+	$size = 0;
+    if ($conn->connect_error) {
+      die("Connection failed: " . $conn->connect_error);
+    }
+	
+	$sql = "SHOW TABLE STATUS";
+	$result = $conn->query($sql);
+	
+	if($result->num_rows >0) {
+		while($row = mysqli_fetch_assoc($result)) {
+			if($row['Name'] == "queue") {
+				$size = $row['Data_length'];
+				break;
+			}
+			
+		}
+	}
+	
+	$size = number_format($size/(1000*1000),2);
+	return $size; 
+  }
+  
+  function GetRecordsSize() {
+	global $SQL_HOSTNAME,$SQL_NAME,$SQL_PASS;
+
+	// Create SQL connection
+    $conn = new mysqli($SQL_HOSTNAME, $SQL_NAME, $SQL_PASS,"search_engine");
+	$size = 0;
+    if ($conn->connect_error) {
+      die("Connection failed: " . $conn->connect_error);
+    }
+	
+	$sql = "SHOW TABLE STATUS";
+	$result = $conn->query($sql);
+	
+	if($result->num_rows >0) {
+		while($row = mysqli_fetch_assoc($result)) {
+			if($row['Name'] == "records") {
+				$size = $row['Data_length'];
+				break;
+			}
+			
+		}
+	}
+	
+	$size = number_format($size/(1000*1000),2);
+	return $size; 
+  }
   
  ?>
